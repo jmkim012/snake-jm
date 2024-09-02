@@ -39,45 +39,105 @@ function direction(event) {
     }
 }
 
+let game; // Declare the game interval variable
+let isPaused = false; // Variable to track the pause state
+
+// Function to start the game
+function startGame() {
+    if (!game) {
+        game = setInterval(draw, 100); // Adjust the interval as needed
+    }
+}
+
+// Function to pause the game
+function pauseGame() {
+    if (game) {
+        clearInterval(game);
+        game = null;
+    }
+}
+
+// Event listeners for play and pause buttons
+document.getElementById('playButton').addEventListener('click', () => {
+    isPaused = false;
+    startGame();
+});
+
+document.getElementById('pauseButton').addEventListener('click', () => {
+    isPaused = true;
+    pauseGame();
+});
+
+// Your existing game loop function
 function draw() {
+    if (isPaused) return; // Skip the game loop if the game is paused
+
+    // Your existing game logic here
+    // Clear the canvas
     gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
+    // Draw the snake
     for (let i = 0; i < snake.length; i++) {
-        gameCtx.fillStyle = (i == 0) ? snakeColor : 'white';
+        gameCtx.fillStyle = snakeColor;
         gameCtx.fillRect(snake[i].x, snake[i].y, box, box);
-        gameCtx.strokeStyle = 'red';
+        gameCtx.strokeStyle = 'black';
         gameCtx.strokeRect(snake[i].x, snake[i].y, box, box);
     }
 
+    // Draw the food
     gameCtx.fillStyle = 'red';
     gameCtx.fillRect(food.x, food.y, box, box);
 
+    // Old head position
     let snakeX = snake[0].x;
     let snakeY = snake[0].y;
 
+    // Direction
     if (d == 'LEFT') snakeX -= box;
     if (d == 'UP') snakeY -= box;
     if (d == 'RIGHT') snakeX += box;
     if (d == 'DOWN') snakeY += box;
 
+    // If the snake eats the food
     if (snakeX == food.x && snakeY == food.y) {
         score++;
-        eatSound.play(); // Play eat sound
+        eatSound.play();
         food = {
             x: Math.floor(Math.random() * (gameCanvas.width / box)) * box,
             y: Math.floor(Math.random() * (gameCanvas.height / box)) * box
         };
-        snakeColor = getRandomColor(); // Change snake color randomly
+        snakeColor = getRandomColor();
     } else {
+        // Remove the tail
         snake.pop();
     }
 
+    // Add new head
     let newHead = {
         x: snakeX,
         y: snakeY
     };
 
-    if (snakeX < 0 || snakeY < 0 || snakeX >= gameCanvas.width || snakeY >= gameCanvas.height || collision(newHead, snake)) {
+    // Go through the wall functionality
+    if (newHead.x < 0) {
+        newHead.x = gameCanvas.width - box;
+        console.log(`newHead.x after boundary check: ${newHead.x}`);
+    } else if (newHead.x >= gameCanvas.width) {
+        newHead.x = 0;
+        console.log(`newHead.x after boundary check: ${newHead.x}`);
+    }
+
+    if (newHead.y < 0) {
+        newHead.y = gameCanvas.height - box;
+        console.log(`newHead.y after boundary check: ${newHead.y}`);
+    } else if (newHead.y >= gameCanvas.height) {
+        newHead.y = 0;
+        console.log(`newHead.y after boundary check: ${newHead.y}`);
+    }
+
+    // Game over
+    if (collision(newHead, snake)) {
+        console.log(`Collision detected! newHead: ${JSON.stringify(newHead)}, snake: ${JSON.stringify(snake)}`);
         gameOverSound.play(); // Play game over sound
         clearInterval(game);
         alert("Game Over! Click OK to restart.");
@@ -103,6 +163,7 @@ function draw() {
     highScoreCtx.fillText("High Score: " + highScore, 10, 40);
 }
 
+// Collision detection function
 function collision(head, array) {
     for (let i = 0; i < array.length; i++) {
         if (head.x == array[i].x && head.y == array[i].y) {
@@ -113,12 +174,22 @@ function collision(head, array) {
 }
 
 function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    const colors = ['#FF0000', '#FFA500', '#FFFF00', '#008000', '#0000FF', '#800080']; // Red, Orange, Yellow, Green, Blue, Bright Purple
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
 }
+/* 
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color;
+    do {
+        color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+    } while (color === '#000000');
+    return color;
+} */
 
-let game = setInterval(draw, 100);
+// Start the game initially
+startGame();

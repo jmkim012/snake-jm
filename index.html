@@ -7,15 +7,22 @@
     <style>
         canvas {
             display: block;
-            margin: 10px auto;
+            margin: 0 auto;
             background-color: #000;
+            border: 2px solid white;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
         }
     </style>
 </head>
 <body>
-    <canvas id="highScoreCanvas" width="600" height="50"></canvas>
-    <canvas id="scoreCanvas" width="600" height="50"></canvas>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <button id="playButton">Play</button>
+    <button id="pauseButton">Pause</button>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <canvas id="scoreCanvas" width="400" height="50"></canvas>
+    <canvas id="highScoreCanvas" width="400" height="50"></canvas>
     <script src="snake.js"></script>
 </body>
 </html>
